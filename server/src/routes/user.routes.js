@@ -4,9 +4,13 @@ import {
   getUser,
   updateUser,
   deleteUser,
+  getAllUsers,
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
+
+// GET /api/users
+router.get("/", getAllUsers);
 
 // POST /api/users
 router.post("/", createUser);

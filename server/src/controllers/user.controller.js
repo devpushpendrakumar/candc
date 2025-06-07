@@ -2,12 +2,33 @@ import pool from "../db/db.js";
 import apiResponse from "../utils/apiResponse.js";
 import apiError from "../utils/apiError.js";
 
+const getAllUsers = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const queryString = `SELECT * FROM users`;
+    const [result] = await pool.query(queryString);
+
+    if (result.length === 0) {
+      return next(new apiError(404, "Users not found"));
+    }
+
+    apiResponse(res, {
+      statusCode: 200,
+      message: "User fetched successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error("GetUser Error:", err);
+    next(new apiError(500, "Server error: Unable to fetch user"));
+  }
+};
+
 const createUser = async (req, res, next) => {
   try {
-    const { name, email } = req.body;
+    const { name, email, phone } = req.body;
 
-    const queryString = `INSERT INTO users (name, email) VALUES (?, ?)`;
-    const [result] = await pool.query(queryString, [name, email]);
+    const queryString = `INSERT INTO users (name, email, phone) VALUES (?, ?, ?)`;
+    const [result] = await pool.query(queryString, [name, email, phone]);
 
     const [user] = await pool.query("SELECT * FROM users WHERE id = ?", [
       result.insertId,
@@ -99,4 +120,4 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
-export { createUser, getUser, updateUser, deleteUser };
+export { createUser, getUser, updateUser, deleteUser, getAllUsers };
