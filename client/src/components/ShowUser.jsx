@@ -1,11 +1,20 @@
 import React from "react";
-import { deleteUser } from "../services/userServices.js";
+import { useState } from "react";
+import { deleteUser, updateUser } from "../services/userServices.js";
 
 function ShowUser({ users, onDelete }) {
-  const handleEdit = (userData) => {
-    // Logic to handle editing a user
-    console.log(`Edit user with ID: ${userId}`);
+  const [edit, setEdit] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+
+  const handleEdit = (user) => {
+    setName(user.name);
+    setEmail(user.email);
+    setPhone(user.phone);
+    setEdit(true);
   };
+
   const handleDelete = async (userId) => {
     try {
       await deleteUser(userId);
@@ -15,6 +24,26 @@ function ShowUser({ users, onDelete }) {
       console.error(`Error deleting user with ID ${userId}:`, err);
     }
   };
+
+  const handleSave = async (user) => {
+    try {
+      const updatedUser = {
+        name: name,
+        email: email,
+        phone: phone,
+      };
+      await updateUser(user.id, updatedUser);
+      console.log("User updated successfully");
+      setEdit(false);
+      setName("");
+      setEmail("");
+      setPhone("");
+      onDelete((pre) => pre + 1);
+    } catch (err) {
+      console.error("Error updating user:", err);
+    }
+  };
+
   return (
     <div>
       <div>User Details</div>
@@ -31,12 +60,59 @@ function ShowUser({ users, onDelete }) {
             return (
               <tbody key={user.id}>
                 <tr>
-                  <td>{user.name}</td>
-                  <td>{user.email}</td>
-                  <td>{user.phone}</td>
+                  <td>
+                    {!edit ? (
+                      user.name
+                    ) : (
+                      <input
+                        id="name"
+                        value={name}
+                        onChange={(e) => {
+                          setName(e.target.value);
+                        }}
+                      />
+                    )}
+                  </td>
+                  <td>
+                    {!edit ? (
+                      user.email
+                    ) : (
+                      <input
+                        id="email"
+                        value={email}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                        }}
+                      />
+                    )}
+                  </td>
+                  <td>
+                    {!edit ? (
+                      user.phone
+                    ) : (
+                      <input
+                        id="phone"
+                        value={phone}
+                        onChange={(e) => {
+                          setPhone(e.target.value);
+                        }}
+                      />
+                    )}
+                  </td>
+                  <td>
+                    {!edit && (
+                      <button onClick={() => handleEdit(user)}>Edit</button>
+                    )}
+                    {!edit && (
+                      <button onClick={() => handleDelete(user.id)}>
+                        Delete
+                      </button>
+                    )}
+                    {edit && (
+                      <button onClick={() => handleSave(user)}>Save</button>
+                    )}
+                  </td>
                 </tr>
-                <button onClick={() => handleEdit(user.id)}>Edit</button>
-                <button onClick={() => handleDelete(user.id)}>Delete</button>
               </tbody>
             );
           })}

@@ -72,7 +72,7 @@ const updateUser = async (req, res, next) => {
     const { name, email, phone } = req.body;
 
     const queryString = `UPDATE users SET name = ?,email = ?, phone = ? WHERE id = ?`;
-    const [result] = await pool.query(queryString, [name, id]);
+    const [result] = await pool.query(queryString, [name, email, phone, id]);
 
     if (result.affectedRows === 0) {
       return next(new apiError(404, "User not found"));

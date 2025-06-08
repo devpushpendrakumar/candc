@@ -58,6 +58,7 @@ const updateUser = async (userId, userData) => {
       },
       body: JSON.stringify(userData),
     });
+
     if (!response.ok) {
       throw new Error("Network response was not ok");
     }
