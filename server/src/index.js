@@ -12,7 +12,7 @@ async function startServer() {
     // Test MySQL connection with a simple query
     const [rows] = await pool.query("SELECT 1");
     console.log("MySQL connected successfully");
-    //tables();
+    tables();
 
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);

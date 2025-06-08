@@ -8,10 +8,6 @@ const getAllUsers = async (req, res, next) => {
     const queryString = `SELECT * FROM users`;
     const [result] = await pool.query(queryString);
 
-    if (result.length === 0) {
-      return next(new apiError(404, "Users not found"));
-    }
-
     apiResponse(res, {
       statusCode: 200,
       message: "User fetched successfully",
@@ -73,9 +69,9 @@ const getUser = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, email, phone } = req.body;
 
-    const queryString = `UPDATE users SET name = ? WHERE id = ?`;
+    const queryString = `UPDATE users SET name = ?,email = ?, phone = ? WHERE id = ?`;
     const [result] = await pool.query(queryString, [name, id]);
 
     if (result.affectedRows === 0) {

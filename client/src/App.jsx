@@ -1,101 +1,53 @@
-const users = [
-  {
-    id: 1,
-    name: "Aarav Sharma",
-    email: "aarav.sharma@example.com",
-    phone: "+91 9876543210",
-  },
-  {
-    id: 2,
-    name: "Sanya Verma",
-    email: "sanya.verma@example.com",
-    phone: "+91 9988776655",
-  },
-  {
-    id: 3,
-    name: "Rohan Gupta",
-    email: "rohan.gupta@example.com",
-    phone: "+91 9123456789",
-  },
-  {
-    id: 4,
-    name: "Diya Patel",
-    email: "diya.patel@example.com",
-    phone: "+91 9555123456",
-  },
-  {
-    id: 5,
-    name: "Vivaan Singh",
-    email: "vivaan.singh@example.com",
-    phone: "+91 9810293847",
-  },
-  {
-    id: 6,
-    name: "Anika Reddy",
-    email: "anika.reddy@example.com",
-    phone: "+91 9001002003",
-  },
-];
-
 import "./App.css";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react"; // Import useCallback
 import GetInput from "./components/GetInput";
 import ShowUser from "./components/ShowUser";
-import { getUsers, createUser } from "./services/userServices.js";
+import { getUsers, createUser } from "./services/userServices.js"; // Assuming createUser is also in userServices.js
 
 function App() {
-  const [usersList, setUsersList] = useState([]);
+  const [usersList, setUsersList] = useState([]); // Initialize with an empty array
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0); // A state variable to trigger re-fetches
 
-  useEffect(() => {function App() {
-  const [usersList, setUsersList] = useState(users);
-  const [list, setList] = useState([]);
-
-  useEffect(async () => {
-    const fetchedUser = await getUsers();
-    setList(fetchedUser);
-  }, [usersList]);
-  return (
-    <div className="AppContainer">
-      <GetInput setUsersList={setUsersList} />
-      <ShowUser users={usersList} />
-    </div>
-  );
-}
-
-export default App;
-
+  // Effect to fetch users when the component mounts or refreshKey changes
+  useEffect(() => {
     const fetchUsers = async () => {
-      setLoading(true);
-      setError(null);
+      setLoading(true); // Set loading true before fetching
+      setError(null); // Clear any previous errors
       try {
         const fetchedUsers = await getUsers();
-        setUsersList(fetchedUsers);
+        //console.log("Fetched users:", fetchedUsers); // Log the fetched users
+        setUsersList(fetchedUsers.data.length > 0 ? fetchedUsers.data : []); // Update the usersList state
       } catch (err) {
         console.error("Failed to fetch users:", err);
-        setError(err);
+        setError(err); // Store the error
       } finally {
-        setLoading(false);
+        setLoading(false); // Set loading false after fetch attempt
       }
     };
 
-    fetchUsers();
-  }, [refreshKey]);
+    fetchUsers(); // Call the async function
+  }, [refreshKey]); // Dependency array: re-run this effect when refreshKey changes
 
+  // Callback function to handle adding a new user
+  // This function will be passed down to GetInput
   const handleAddUser = useCallback(async (newUserData) => {
     try {
+      // 1. Send new user data to the server
       await createUser(newUserData);
 
+      // 2. If successful, increment refreshKey to trigger getUsers() again
       setRefreshKey((prev) => prev + 1);
 
+      // Optional: Give feedback to the user (e.g., a success message)
       console.log("User added successfully!");
     } catch (err) {
       console.error("Error adding user:", err);
+      // Handle error, e.g., show an error message to the user
       setError(err);
     }
-  }, []);
+  }, []); // Empty dependency array for useCallback means this function won't change unless its internal dependencies change.
 
   if (loading) {
     return <div className="AppContainer">Loading users...</div>;
@@ -111,8 +63,10 @@ export default App;
 
   return (
     <div className="AppContainer">
+      {/* Pass the handleAddUser function to GetInput */}
       <GetInput onUserAdded={handleAddUser} />
-      <ShowUser users={usersList} />
+      {/* Display the fetched users */}
+      <ShowUser users={usersList} onDelete={setRefreshKey} />
     </div>
   );
 }
